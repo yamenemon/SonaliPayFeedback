@@ -78,9 +78,13 @@ class FeedbackView extends StatelessWidget {
                       ),
                     SizedBox(height: 16.0),
                     ElevatedButton(
-                      onPressed: () => formController.submitForm(context),
+                      onPressed: () {
+                        _dismissKeyboard();
+                        formController.submitForm(context);
+                      },
                       child: Text('Submit'),
                     ),
+                    SizedBox(height: 50.0),
                   ],
                 ),
               );
