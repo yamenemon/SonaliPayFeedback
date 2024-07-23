@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "542553101161",
+    "project_id": "sonalipayfeedback",
+    "storage_bucket": "sonalipayfeedback.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:542553101161:android:5b551cb7926527c1c6a3f8",
+        "android_client_info": {
+          "package_name": "com.sbuk.feedbackSonalipay"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA149VyxscGbukpg5zDMKvnSTMC0943X78"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

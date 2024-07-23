@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:feedback_sonalipay/feedback_model.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 class FeedbackController extends ChangeNotifier {
@@ -30,12 +31,31 @@ class FeedbackController extends ChangeNotifier {
 
   Future<void> pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
-    if (result != null) {
+    if (result != null && result.files.single.path != null) {
       updateAttachment(File(result.files.single.path!));
+    } else {
+      updateAttachment(null);
     }
   }
 
-  void submitForm(BuildContext context) {
+  void submitForm(BuildContext context) async {
+    FocusScope.of(context).unfocus();
+    // Get a reference to the database
+    final databaseReference = FirebaseDatabase.instance.ref();
+
+    // Create a new user with unique key
+    DatabaseReference newUserRef = databaseReference.child("db").push();
+
+    // Set data to the new user
+    newUserRef.set({
+      'name': 'John Doe',
+      'email': 'johndoe@example.com',
+      'age': 30,
+    }).then((_) {
+      print("User added successfully.");
+    }).catchError((error) {
+      print("Failed to add user: $error");
+    });
     if (_formState.isValid) {
       // Process the form data
       print('Form Submitted');

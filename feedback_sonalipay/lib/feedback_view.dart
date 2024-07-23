@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class FeedbackView extends StatelessWidget {
-  const FeedbackView({super.key});
+  FeedbackView({super.key});
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -78,10 +79,7 @@ class FeedbackView extends StatelessWidget {
                       ),
                     SizedBox(height: 16.0),
                     ElevatedButton(
-                      onPressed: () {
-                        _dismissKeyboard();
-                        formController.submitForm(context);
-                      },
+                      onPressed: () => formController.submitForm(context),
                       child: Text('Submit'),
                     ),
                     SizedBox(height: 50.0),
