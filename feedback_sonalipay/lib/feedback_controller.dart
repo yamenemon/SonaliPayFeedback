@@ -44,10 +44,10 @@ class FeedbackController extends ChangeNotifier {
     final databaseReference = FirebaseDatabase.instance.ref();
 
     // Create a new user with unique key
-    DatabaseReference newUserRef = databaseReference.child("db").push();
+    // DatabaseReference newUserRef = databaseReference.child("db").push();
 
     // Set data to the new user
-    newUserRef.set({
+    await databaseReference.set({
       'name': 'John Doe',
       'email': 'johndoe@example.com',
       'age': 30,
