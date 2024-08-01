@@ -1,12 +1,28 @@
 import 'dart:io';
-
-import 'package:feedback_sonalipay/feedback_model.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:file_picker/file_picker.dart';
+
+class FeedbackFormState {
+  String name = '';
+  String email = '';
+  String complaint = '';
+  File? attachment;
+
+  FeedbackFormState({
+    required this.name,
+    required this.email,
+    required this.complaint,
+    this.attachment,
+  });
+}
 
 class FeedbackController extends ChangeNotifier {
-  FeedbackFormState _formState = FeedbackFormState();
+  FeedbackFormState _formState =
+      FeedbackFormState(name: '', email: '', complaint: '');
+
   FeedbackFormState get formState => _formState;
 
   void updateName(String name) {
@@ -24,54 +40,67 @@ class FeedbackController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateAttachment(File? attachment) {
-    _formState.attachment = attachment;
-    notifyListeners();
-  }
-
   Future<void> pickFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
-    if (result != null && result.files.single.path != null) {
-      updateAttachment(File(result.files.single.path!));
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: [
+        'jpg',
+        'jpeg',
+        'png',
+        'mp3',
+        'mp4',
+        'wav'
+      ], // Allowed file types
+    );
+
+    if (result != null) {
+      _formState.attachment = File(result.files.single.path!);
+      notifyListeners();
     } else {
-      updateAttachment(null);
+      print('User canceled file picking');
     }
   }
 
-  void submitForm(BuildContext context) async {
-    FocusScope.of(context).unfocus();
-    // Get a reference to the database
-    final databaseReference = FirebaseDatabase.instance.ref();
+  Future<String?> uploadAttachment(File file) async {
+    try {
+      String fileName = file.path.split('/').last;
+      Reference ref =
+          FirebaseStorage.instance.ref().child('attachments/$fileName');
+      UploadTask uploadTask = ref.putFile(file);
+      TaskSnapshot taskSnapshot = await uploadTask;
+      return await taskSnapshot.ref.getDownloadURL();
+    } catch (e) {
+      print('Error uploading attachment: $e');
+      return null;
+    }
+  }
 
-    // Create a new user with unique key
-    // DatabaseReference newUserRef = databaseReference.child("db").push();
+  Future<void> storeUserInformation(
+      String name, String email, String complaint, String attachmentUrl) async {
+    try {
+      await FirebaseFirestore.instance.collection('users').add({
+        'name': name,
+        'email': email,
+        'complaint': complaint,
+        'attachmentUrl': attachmentUrl,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print('Error storing user information: $e');
+    }
+  }
 
-    // Set data to the new user
-    await databaseReference.set({
-      'name': 'John Doe',
-      'email': 'johndoe@example.com',
-      'age': 30,
-    }).then((_) {
-      print("User added successfully.");
-    }).catchError((error) {
-      print("Failed to add user: $error");
-    });
-    if (_formState.isValid) {
-      // Process the form data
-      print('Form Submitted');
-      print('Name: ${_formState.name}');
-      print('Email: ${_formState.email}');
-      print('Complaint: ${_formState.complaint}');
-      if (_formState.attachment != null) {
-        print('Attachment: ${_formState.attachment!.path}');
+  Future<void> handleUserInformation(
+      String name, String email, String complaint) async {
+    if (_formState.attachment != null) {
+      String? attachmentUrl = await uploadAttachment(_formState.attachment!);
+      if (attachmentUrl != null) {
+        await storeUserInformation(name, email, complaint, attachmentUrl);
+      } else {
+        print('Failed to upload attachment');
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Form Submitted')),
-      );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please fill in all fields correctly')),
-      );
+      await storeUserInformation(name, email, complaint, '');
     }
   }
 }
