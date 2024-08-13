@@ -67,49 +67,6 @@ class FeedbackController extends ChangeNotifier {
     }
   }
 
-  // Future<String?> uploadAttachment(File file) async {
-  //   try {
-  //     String fileName = file.path.split('/').last;
-  //     Reference ref =
-  //         FirebaseStorage.instance.ref().child('attachments/$fileName');
-  //     UploadTask uploadTask = ref.putFile(file);
-  //     TaskSnapshot taskSnapshot = await uploadTask;
-  //     return await taskSnapshot.ref.getDownloadURL();
-  //   } catch (e) {
-  //     print('Error uploading attachment: $e');
-  //     return null;
-  //   }
-  // }
-
-  // Future<void> storeUserInformation(
-  //     String name, String email, String complaint, String attachmentUrl) async {
-  //   try {
-  //     await FirebaseFirestore.instance.collection('users').add({
-  //       'name': name,
-  //       'email': email,
-  //       'complaint': complaint,
-  //       'attachmentUrl': attachmentUrl,
-  //       'timestamp': FieldValue.serverTimestamp(),
-  //     });
-  //   } catch (e) {
-  //     print('Error storing user information: $e');
-  //   }
-  // }
-
-  // Future<void> handleUserInformation(
-  //     String name, String email, String complaint) async {
-  //   if (_formState.attachment != null) {
-  //     String? attachmentUrl = await uploadAttachment(_formState.attachment!);
-  //     if (attachmentUrl != null) {
-  //       await storeUserInformation(name, email, complaint, attachmentUrl);
-  //     } else {
-  //       print('Failed to upload attachment');
-  //     }
-  //   } else {
-  //     await storeUserInformation(name, email, complaint, '');
-  //   }
-  // }
-
   Future<void> handleUserInformation(
       String name, String email, String complaint) async {
     print(name);
