@@ -1,9 +1,15 @@
 import 'dart:io';
+import 'package:feedback_sonalipay/declaration.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:io';
+import 'package:path/path.dart';
+// To handle JSON encoding and decoding
 
 class FeedbackFormState {
   String name = '';
@@ -61,46 +67,103 @@ class FeedbackController extends ChangeNotifier {
     }
   }
 
-  Future<String?> uploadAttachment(File file) async {
-    try {
-      String fileName = file.path.split('/').last;
-      Reference ref =
-          FirebaseStorage.instance.ref().child('attachments/$fileName');
-      UploadTask uploadTask = ref.putFile(file);
-      TaskSnapshot taskSnapshot = await uploadTask;
-      return await taskSnapshot.ref.getDownloadURL();
-    } catch (e) {
-      print('Error uploading attachment: $e');
-      return null;
-    }
-  }
+  // Future<String?> uploadAttachment(File file) async {
+  //   try {
+  //     String fileName = file.path.split('/').last;
+  //     Reference ref =
+  //         FirebaseStorage.instance.ref().child('attachments/$fileName');
+  //     UploadTask uploadTask = ref.putFile(file);
+  //     TaskSnapshot taskSnapshot = await uploadTask;
+  //     return await taskSnapshot.ref.getDownloadURL();
+  //   } catch (e) {
+  //     print('Error uploading attachment: $e');
+  //     return null;
+  //   }
+  // }
 
-  Future<void> storeUserInformation(
-      String name, String email, String complaint, String attachmentUrl) async {
-    try {
-      await FirebaseFirestore.instance.collection('users').add({
-        'name': name,
-        'email': email,
-        'complaint': complaint,
-        'attachmentUrl': attachmentUrl,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-    } catch (e) {
-      print('Error storing user information: $e');
-    }
-  }
+  // Future<void> storeUserInformation(
+  //     String name, String email, String complaint, String attachmentUrl) async {
+  //   try {
+  //     await FirebaseFirestore.instance.collection('users').add({
+  //       'name': name,
+  //       'email': email,
+  //       'complaint': complaint,
+  //       'attachmentUrl': attachmentUrl,
+  //       'timestamp': FieldValue.serverTimestamp(),
+  //     });
+  //   } catch (e) {
+  //     print('Error storing user information: $e');
+  //   }
+  // }
+
+  // Future<void> handleUserInformation(
+  //     String name, String email, String complaint) async {
+  //   if (_formState.attachment != null) {
+  //     String? attachmentUrl = await uploadAttachment(_formState.attachment!);
+  //     if (attachmentUrl != null) {
+  //       await storeUserInformation(name, email, complaint, attachmentUrl);
+  //     } else {
+  //       print('Failed to upload attachment');
+  //     }
+  //   } else {
+  //     await storeUserInformation(name, email, complaint, '');
+  //   }
+  // }
 
   Future<void> handleUserInformation(
       String name, String email, String complaint) async {
-    if (_formState.attachment != null) {
-      String? attachmentUrl = await uploadAttachment(_formState.attachment!);
-      if (attachmentUrl != null) {
-        await storeUserInformation(name, email, complaint, attachmentUrl);
-      } else {
-        print('Failed to upload attachment');
+    print(name);
+    print(email);
+    print(complaint);
+
+    final url = Uri.parse('https://churchapp.nzian.xyz/complains');
+
+    try {
+      var request = http.MultipartRequest('POST', url);
+
+      String basicAuth =
+          'Basic ' + base64Encode(utf8.encode('$username:$password'));
+      // Add authentication header
+      request.headers['Authorization'] = basicAuth;
+      // request.headers['Authorization'] = 'Bearer $token';
+
+      // Add text fields
+      request.fields['name'] = name;
+      request.fields['email'] = email;
+      request.fields['complain'] = complaint;
+      request.fields['created_at'] = DateTime.now().toString();
+
+      // Add file if available
+      if (formState.attachment != null) {
+        // Get the file name and mime type
+        final fileName = basename(formState.attachment!.path);
+        final fileStream = http.ByteStream(formState.attachment!.openRead());
+        final fileLength = await formState.attachment!.length();
+
+        request.files.add(
+          http.MultipartFile(
+            'image', // This is the field name that your backend expects
+            fileStream,
+            fileLength,
+            filename: fileName,
+          ),
+        );
       }
-    } else {
-      await storeUserInformation(name, email, complaint, '');
+
+      // Send the request
+      final response = await request.send();
+
+      // Check for the response status
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // Handle the response, for example:
+        final responseBody = await response.stream.bytesToString();
+        print('Response: $responseBody');
+      } else {
+        print(
+            'Failed to submit complaint. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error submitting complaint: $e');
     }
   }
 }

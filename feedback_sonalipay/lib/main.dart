@@ -1,16 +1,16 @@
 import 'package:feedback_sonalipay/feedback_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
+// import 'package:firebase_core/firebase_core.dart';
+// import 'firebase_options.dart';
 
 void main() async {
-  WidgetsFlutterBinding
-      .ensureInitialized(); // IMPORTANT FOR INITIALIZING PROJECT WHILE ADDING FIREBASE
+  // WidgetsFlutterBinding
+  //     .ensureInitialized(); // IMPORTANT FOR INITIALIZING PROJECT WHILE ADDING FIREBASE
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  // await Firebase.initializeApp(
+  //   options: DefaultFirebaseOptions.currentPlatform,
+  // );
   runApp(
     ProviderScope(
       child: const MainApp(),
