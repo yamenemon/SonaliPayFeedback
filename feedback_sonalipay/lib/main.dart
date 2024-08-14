@@ -1,4 +1,6 @@
 import 'package:feedback_sonalipay/feedback_view.dart';
+import 'package:feedback_sonalipay/navigation_service.dart';
+import 'package:feedback_sonalipay/user_type.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 // import 'package:firebase_core/firebase_core.dart';
@@ -25,9 +27,10 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      navigatorKey: NavigationService().navigationKey,
       home: Scaffold(
         body: Center(
-          child: FeedbackView(),
+          child: UserType(),
         ),
       ),
     );

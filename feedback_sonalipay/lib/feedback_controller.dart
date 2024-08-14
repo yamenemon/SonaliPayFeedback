@@ -1,5 +1,8 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:feedback_sonalipay/declaration.dart';
+import 'package:feedback_sonalipay/navigation_service.dart';
+import 'package:feedback_sonalipay/user_type.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter_riverpod/flutter_riverpod.dart';
 // import 'package:cloud_firestore/cloud_firestore.dart';
@@ -114,6 +117,8 @@ class FeedbackController extends ChangeNotifier {
         // Handle the response, for example:
         final responseBody = await response.stream.bytesToString();
         print('Response: $responseBody');
+        NavigationService().dismissKeyboard();
+        NavigationService().navigateToScreen(UserType());
       } else {
         print(
             'Failed to submit complaint. Status code: ${response.statusCode}');

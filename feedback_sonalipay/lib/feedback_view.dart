@@ -1,4 +1,6 @@
 import 'package:feedback_sonalipay/declaration.dart';
+import 'package:feedback_sonalipay/navigation_service.dart';
+import 'package:feedback_sonalipay/user_type.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -27,6 +29,15 @@ class FeedbackForm extends ConsumerWidget {
       child: Scaffold(
         appBar: AppBar(
           title: Text('Complaint Form'),
+          leading: InkWell(
+            onTap: () {
+              NavigationService().navigateToScreen(UserType());
+            },
+            child: Icon(
+              Icons.arrow_back_ios,
+              color: Colors.black54,
+            ),
+          ),
         ),
         body: SingleChildScrollView(
           padding: EdgeInsets.all(16.0),
@@ -88,7 +99,6 @@ class FeedbackForm extends ConsumerWidget {
                 ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      _dismissKeyboard(context);
                       formController.handleUserInformation(
                         formState.name,
                         formState.email,
