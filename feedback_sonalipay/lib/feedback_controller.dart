@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 import 'package:feedback_sonalipay/declaration.dart';
 import 'package:feedback_sonalipay/navigation_service.dart';
